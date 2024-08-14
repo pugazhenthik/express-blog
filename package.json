@@ -1,0 +1,28 @@
+{
+  "name": "express-blog",
+  "version": "1.0.0",
+  "description": "Express JS blog",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/pugazhenthik/express-blog.git"
+  },
+  "keywords": [
+    "Express",
+    "Node",
+    "Express",
+    "blog",
+    "Node",
+    "JS",
+    "Blog"
+  ],
+  "author": "Pugazhethi K",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pugazhenthik/express-blog/issues"
+  },
+  "homepage": "https://github.com/pugazhenthik/express-blog#readme"
+}
