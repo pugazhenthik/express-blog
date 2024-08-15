@@ -18,7 +18,7 @@ const port = process.env.PORT || 3000;
 app.get('/', async (req, res) => {
     let cached = false;
     let result;
-
+    let start = new Date().getTime();
     let cachedResult = await redisClient.get('todos', (error, todos) => {
         if (error) console.log('Something went wrong');
         if (todos) return todos;
@@ -34,7 +34,9 @@ app.get('/', async (req, res) => {
         await redisClient.SETEX('todos', 30000, JSON.stringify(data));
         result = data;
     }
-    res.send({ fromCache: cached, data: result });
+    let end = new Date().getTime();
+    let resposneTime = (end - start) / 1000;
+    res.send({ responseTime: resposneTime, fromCache: cached, data: result });
 });
 
 app.listen(port, () => {
