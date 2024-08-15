@@ -27,8 +27,10 @@
   },
   "homepage": "https://github.com/pugazhenthik/express-blog#readme",
   "dependencies": {
+    "axios": "^1.7.4",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "redis": "^4.7.0"
   },
   "devDependencies": {
     "prettier": "^3.3.3"
