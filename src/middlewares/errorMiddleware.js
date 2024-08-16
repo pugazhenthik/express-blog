@@ -1,7 +1,7 @@
 // Not Found Handler (for 404 errors)
 
 const notFoundHandler = (req, res, next) => {
-    const error = new Error(`Not Found - ${req.orginalUrl}`);
+    const error = new Error(`Not Found - ${req.originalUrl}`);
     res.status(404);
     next(error);
     // res.json({ status: 404, data: 'This is not a valid API' });
