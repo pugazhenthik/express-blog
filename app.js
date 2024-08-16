@@ -1,4 +1,5 @@
 const express = require('express');
+require('./src/config/database');
 
 const {
     notFoundHandler,
