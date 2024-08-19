@@ -1,5 +1,5 @@
 const express = require('express');
-require('./src/config/database');
+const connectDB = require('./src/config/database');
 
 const {
     notFoundHandler,
@@ -13,6 +13,8 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+connectDB();
 
 app.use(appRouter);
 app.use('/posts', postRouter);
