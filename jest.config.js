@@ -1,4 +1,5 @@
 module.exports = {
+    coverage: true,
     collectCoverage: true,
-    coverageReporters: ['text', 'cobertura'],
+    coverageReporters: ['json'],
 };
