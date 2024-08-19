@@ -1,5 +1,5 @@
 describe('Post controller', () => {
-    it('test workflow', () => {
+    it('testing workflow config', () => {
         expect(true).toBe(true);
     });
 });
