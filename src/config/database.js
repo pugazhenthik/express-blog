@@ -23,7 +23,6 @@ const connectDB = async () => {
     } catch (error) {
         console.log(`MongoDB Not Connected`);
     } finally {
-        await mongoose.disconnect();
         console.log(`MongoDB Connection Closed`);
     }
 };
