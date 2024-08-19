@@ -52,22 +52,22 @@ const updatePost = async (req, res) => {
             error: error.message,
         });
     }
+};
 
-    const deletePost = async (req, res) => {
-        try {
-            const post = await Post.findByIdAndDelete(req.params.id);
-            if (!post) {
-                res.status(500).json({ message: 'Post not deleted' });
-            }
-
-            res.status(200).json({ message: 'Post deleted successfully' });
-        } catch (error) {
-            res.status(500).json({
-                message: 'Something went wrong',
-                error: error.message,
-            });
+const deletePost = async (req, res) => {
+    try {
+        const post = await Post.findByIdAndDelete(req.params.id);
+        if (!post) {
+            res.status(500).json({ message: 'Post not deleted' });
         }
-    };
+
+        res.status(200).json({ message: 'Post deleted successfully' });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Something went wrong',
+            error: error.message,
+        });
+    }
 };
 
 module.exports = {
