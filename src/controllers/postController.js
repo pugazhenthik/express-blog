@@ -3,6 +3,11 @@ const Post = require('../models/Post');
 const getPosts = async (req, res) => {
     try {
         const posts = await Post.find();
+        if (!posts)
+            res.status(200).json({
+                message: 'No records found',
+                data: [],
+            });
         res.status(200).json(posts);
     } catch (error) {
         res.status(500).json({
@@ -15,6 +20,10 @@ const getPosts = async (req, res) => {
 const getPost = async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
+        if (!post)
+            res.status(200).json({
+                message: 'Post not found!',
+            });
         res.status(200).json(post);
     } catch (error) {
         res.status(500).json({
