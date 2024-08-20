@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv');
 const connectDB = require('./src/config/database');
 
 const {
@@ -14,7 +15,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+    connectDB();
+}
 
 app.use(appRouter);
 app.use('/posts', postRouter);

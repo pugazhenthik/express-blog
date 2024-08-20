@@ -26,7 +26,6 @@ const getPost = async (req, res) => {
             });
         res.status(200).json(post);
     } catch (error) {
-        console.log(error.message);
         res.status(500).json({
             message: 'Something went wrong',
             error: error.message,

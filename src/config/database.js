@@ -16,14 +16,13 @@ const clientOptions = {
 
 const connectDB = async () => {
     try {
+        // await mongoose.disconnect();
         await mongoose.connect(url, clientOptions);
 
         await mongoose.connection.db.admin().command({ ping: 1 });
         console.log(`MongoDB Connected`);
     } catch (error) {
         console.log(`MongoDB Not Connected`);
-    } finally {
-        console.log(`MongoDB Connection Closed`);
     }
 };
 
