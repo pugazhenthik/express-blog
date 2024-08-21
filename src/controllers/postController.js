@@ -2,13 +2,21 @@ const Post = require('../models/Post');
 
 const getPosts = async (req, res) => {
     try {
-        const posts = await Post.find();
-        if (!posts)
+        const limit = parseInt(req.query.limit) || 10;
+        const filters = {};
+
+        if (req.query.title) {
+            filters.title = { $regex: req.query.title, $options: 'i' };
+        }
+        const posts = await Post.find(filters).select('title').limit(limit);
+        if (!posts) {
             res.status(200).json({
                 message: 'No records found',
                 data: [],
             });
-        res.status(200).json(posts);
+        } else {
+            res.status(200).json(posts);
+        }
     } catch (error) {
         res.status(500).json({
             message: 'Something went wrong',
@@ -20,11 +28,13 @@ const getPosts = async (req, res) => {
 const getPost = async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
-        if (!post)
-            res.status(200).json({
+        if (!post) {
+            res.status(404).json({
                 message: 'Post not found!',
             });
-        res.status(200).json(post);
+        } else {
+            res.status(200).json(post);
+        }
     } catch (error) {
         res.status(500).json({
             message: 'Something went wrong',
@@ -35,8 +45,7 @@ const getPost = async (req, res) => {
 
 const createPost = async (req, res) => {
     try {
-        const post = new Post(req.body);
-        await post.save();
+        const post = await Post.create(req.body);
         res.status(201).json(post);
     } catch (error) {
         res.status(500).json({
@@ -51,10 +60,12 @@ const updatePost = async (req, res) => {
         const post = await Post.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
         });
+
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
+        } else {
+            res.json(post);
         }
-        res.json(post);
     } catch (error) {
         res.status(500).json({
             message: 'Error updating post',
@@ -67,10 +78,10 @@ const deletePost = async (req, res) => {
     try {
         const post = await Post.findByIdAndDelete(req.params.id);
         if (!post) {
-            res.status(500).json({ message: 'Post not deleted' });
+            res.status(404).json({ message: 'Post not found' });
+        } else {
+            res.status(200).json({ message: 'Post deleted successfully!' });
         }
-
-        res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
         res.status(500).json({
             message: 'Something went wrong',
