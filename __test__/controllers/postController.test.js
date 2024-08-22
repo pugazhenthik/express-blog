@@ -171,4 +171,24 @@ describe('PostController', () => {
         expect(500);
         expect(res.body).toHaveProperty('message', 'Something went wrong');
     });
+
+    it('should delete all posts', async () => {
+        await Post.create({ title: 'Title', content: 'Content' });
+        const res = await request(app).delete('/posts/all');
+        expect(200);
+        console.log(res.body);
+        expect(res.body).toHaveProperty(
+            'message',
+            'Posts are deleted successfully!',
+        );
+    });
+
+    it('should handle error in delete all posts', async () => {
+        jest.spyOn(Post, 'deleteMany').mockImplementationOnce(() => {
+            throw new Error('Post not deleted');
+        });
+        const res = await request(app).delete('/posts/all');
+        expect(500);
+        expect(res.body).toHaveProperty('message', 'Something went wrong');
+    });
 });
