@@ -25,12 +25,12 @@
   "homepage": "https://github.com/pugazhenthik/express-blog#readme",
   "dependencies": {
     "express": "^4.19.2",
-    "mongodb-memory-server": "^10.0.0",
     "mongoose": "^8.5.3"
   },
   "devDependencies": {
     "codecov": "^3.8.2",
     "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.0.0",
     "prettier": "^3.3.3",
     "supertest": "^7.0.0"
   }
