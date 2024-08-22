@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-require('dotenv');
 
-const password = process.env.DB_PASSWORD;
-const username = process.env.DB_USERNAME;
-const hostname = process.env.DB_HOSTNAME;
-const appname = process.env.DB_APPNAME;
+// const password = process.env.DB_PASSWORD;
+// const username = process.env.DB_USERNAME;
+// const hostname = process.env.DB_HOSTNAME;
+// const appname = process.env.DB_APPNAME;
 
 // const url = `mongodb+srv://${username}:${password}@${hostname}.mongodb.net/blog?retryWrites=true&w=majority&appName=${appname}`;
 const url =
@@ -16,7 +15,7 @@ const clientOptions = {
 
 const connectDB = async () => {
     try {
-        // await mongoose.disconnect();
+        await mongoose.disconnect();
         await mongoose.connect(url, clientOptions);
 
         await mongoose.connection.db.admin().command({ ping: 1 });
