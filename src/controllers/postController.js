@@ -90,10 +90,23 @@ const deletePost = async (req, res) => {
     }
 };
 
+const deleteAllPosts = async (req, res) => {
+    try {
+        await Post.deleteMany({});
+        res.status(200).json({ message: 'Posts are deleted successfully!' });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Something went wrong',
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     getPosts,
     getPost,
     createPost,
     updatePost,
     deletePost,
+    deleteAllPosts,
 };

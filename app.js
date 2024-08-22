@@ -7,7 +7,7 @@ const {
 } = require('./src/middlewares/errorMiddleware');
 
 const appRouter = require('./src/routes/appRoutes');
-const postRouter = require('./src/routes/postRouts');
+const postRouter = require('./src/routes/postRoutes');
 
 const app = express();
 
