@@ -1,6 +1,14 @@
 const Category = require('../models/Category');
 
-const getCategories = async (req, res) => {};
+const getCategories = async (req, res) => {
+    try {
+        const categories = Category.find();
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).json('Something went wrong');
+    }
+};
+
 const getCategory = async (req, res) => {
     try {
         const category = await Category.findById(req.params.id);
@@ -27,4 +35,10 @@ const createCategory = async (req, res) => {
             error: error.message,
         });
     }
+};
+
+module.exports = {
+    getCategories,
+    getCategory,
+    createCategory,
 };
