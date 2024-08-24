@@ -176,7 +176,6 @@ describe('PostController', () => {
         await Post.create({ title: 'Title', content: 'Content' });
         const res = await request(app).delete('/posts/all');
         expect(200);
-        console.log(res.body);
         expect(res.body).toHaveProperty(
             'message',
             'Posts are deleted successfully!',
