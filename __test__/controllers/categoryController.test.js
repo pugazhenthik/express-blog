@@ -89,4 +89,62 @@ describe('CategoryController', () => {
         );
         expect(category.body.error).toBe('Database error!');
     });
+
+    it('should handle error in update a category', async () => {
+        jest.spyOn(Category, 'findByIdAndUpdate').mockImplementation(() => {
+            throw new Error('Database error!');
+        });
+
+        const category = await request(app).put('/categories/1').send({});
+
+        expect(category.status).toBe(500);
+        expect(category.body.message).toBe(
+            'Something went wrong while updating a category.',
+        );
+        expect(category.body.error).toBe('Database error!');
+    });
+
+    it('should handle error 404 not found category in update category', async () => {
+        jest.spyOn(Category, 'findByIdAndUpdate').mockReturnValue(null);
+
+        const category = await request(app).put('/categories/1').send({});
+        expect(category.status).toBe(404);
+        expect(category.body.message).toBe('Category not found!');
+    });
+
+    it('shold update a category given input', async () => {
+        const data = { id: 1, name: 'Updated category', isAction: true };
+        jest.spyOn(Category, 'findByIdAndUpdate').mockImplementation(
+            () => data,
+        );
+
+        const category = await request(app).put('/categories/1').send(data);
+        expect(category.status).toBe(200);
+        expect(category.body.message).toBe('Category updated successfully!');
+    });
+
+    it('should handle category not found error in delete category', async () => {
+        jest.spyOn(Category, 'findByIdAndDelete').mockImplementation(
+            () => null,
+        );
+
+        const category = await request(app).delete('/categories/1');
+
+        expect(category.status).toBe(404);
+        expect(category.body.message).toBe('Category not found!');
+    });
+
+    it('should handle error in delete category', async () => {
+        jest.spyOn(Category, 'findByIdAndDelete').mockImplementation(() => {
+            throw new Error('Database error!');
+        });
+
+        const category = await request(app).delete('/categories/1');
+
+        expect(category.status).toBe(500);
+        expect(category.body.message).toBe(
+            'Something went wrong while deleting a category.',
+        );
+        expect(category.body.error).toBe('Database error!');
+    });
 });

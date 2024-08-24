@@ -43,8 +43,51 @@ const createCategory = async (req, res) => {
     }
 };
 
+const updateCategory = async (req, res) => {
+    try {
+        const category = Category.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+        });
+
+        if (!category) {
+            res.status(404).json({
+                message: 'Category not found!',
+            });
+        } else {
+            res.status(200).json({
+                message: 'Category updated successfully!',
+                data: category,
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Something went wrong while updating a category.',
+            error: error.message,
+        });
+    }
+};
+
+const deleteCategory = async (req, res) => {
+    try {
+        const category = Category.findByIdAndDelete(req.params.id);
+
+        if (category) {
+            res.status(200).json({ message: 'Category deleted successfully!' });
+        } else {
+            res.status(404).json({ message: 'Category not found!' });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Something went wrong while deleting a category.',
+            error: error.message,
+        });
+    }
+};
+
 module.exports = {
     getCategories,
     getCategory,
     createCategory,
+    updateCategory,
+    deleteCategory,
 };
