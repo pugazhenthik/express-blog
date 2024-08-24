@@ -147,4 +147,15 @@ describe('CategoryController', () => {
         );
         expect(category.body.error).toBe('Database error!');
     });
+
+    it('should delete a category', async () => {
+        jest.spyOn(Category, 'findByIdAndDelete').mockImplementation(
+            () => true,
+        );
+
+        const category = await request(app).delete('/categories/1');
+
+        expect(category.status).toBe(200);
+        expect(category.body.message).toBe('Category deleted successfully!');
+    });
 });
