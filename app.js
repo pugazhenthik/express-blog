@@ -7,6 +7,7 @@ const {
 } = require('./src/middlewares/errorMiddleware');
 
 const appRouter = require('./src/routes/appRoutes');
+const categoryRouter = require('./src/routes/categoryRoutes');
 const postRouter = require('./src/routes/postRoutes');
 
 const app = express();
@@ -20,6 +21,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 app.use(appRouter);
 app.use('/posts', postRouter);
+app.use('/categories', categoryRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
