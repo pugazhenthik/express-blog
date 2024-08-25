@@ -1,12 +1,15 @@
 const mongoose = require('mongoose');
 
-const tagSchema = mongoose.Schema({
+const tagSchema = new mongoose.Schema({
     name: {
         type: String,
-        require: true,
+        trim: true,
+        required: true,
+        min: 3,
     },
     description: {
         type: String,
+        trim: true,
     },
     isActive: {
         type: Boolean,
