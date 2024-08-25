@@ -10,6 +10,7 @@ const appRouter = require('./src/routes/appRoutes');
 const categoryRouter = require('./src/routes/categoryRoutes');
 const postRouter = require('./src/routes/postRoutes');
 const tagRouter = require('./src/routes/tagRoutes');
+const userRouter = require('./src/routes/userRoutes');
 
 const app = express();
 
@@ -21,6 +22,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 app.use(appRouter);
+app.use('/users', userRouter);
 app.use('/posts', postRouter);
 app.use('/categories', categoryRouter);
 app.use('/tags', tagRouter);
