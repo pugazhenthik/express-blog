@@ -2,7 +2,7 @@ const Category = require('../models/Category');
 
 const getCategories = async (req, res) => {
     try {
-        const categories = Category.find();
+        const categories = await Category.find();
         res.status(200).json(categories);
     } catch (error) {
         res.status(500).json({
@@ -45,9 +45,13 @@ const createCategory = async (req, res) => {
 
 const updateCategory = async (req, res) => {
     try {
-        const category = Category.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
+        const category = await Category.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            {
+                new: true,
+            },
+        );
 
         if (!category) {
             res.status(404).json({
@@ -69,7 +73,7 @@ const updateCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
     try {
-        const category = Category.findByIdAndDelete(req.params.id);
+        const category = await Category.findByIdAndDelete(req.params.id);
 
         if (category) {
             res.status(200).json({ message: 'Category deleted successfully!' });
