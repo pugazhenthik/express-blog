@@ -6,7 +6,7 @@ const getTags = async (req, res) => {
         if (!tags) {
             return res
                 .status(200)
-                .json({ message: 'No records found.', data: [] });
+                .json({ message: 'No records found', data: [] });
         }
         return res.status(200).json({ data: tags });
     } catch (error) {
@@ -46,11 +46,6 @@ const createTag = async (req, res) => {
             data: tag,
         });
     } catch (error) {
-        if (error.name === 'ValidationError') {
-            return res
-                .status(400)
-                .json({ message: 'Validation error', errors: error.errors });
-        }
         return res.status(500).json({
             message: 'Something went wrong while creating a tag.',
             error: error.message,

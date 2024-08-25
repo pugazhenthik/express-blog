@@ -15,6 +15,14 @@ describe('TagController', () => {
     });
 
     it('should handle error in get all tags', async () => {
+        jest.spyOn(Tag, 'find').mockImplementation(() => null);
+        const tags = await request(app).get('/tags');
+        expect(tags.status).toBe(200);
+        expect(tags.body.message).toBe('No records found');
+        expect(tags.body.data).toEqual([]);
+    });
+
+    it('should handle error in get all tags', async () => {
         jest.spyOn(Tag, 'find').mockImplementation(() => {
             throw new Error('Database error!');
         });
