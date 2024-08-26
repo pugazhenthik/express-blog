@@ -7,6 +7,7 @@ const {
 } = require('./src/middlewares/errorMiddleware');
 
 const appRouter = require('./src/routes/appRoutes');
+const authRouter = require('./src/routes/authRoutes');
 const categoryRouter = require('./src/routes/categoryRoutes');
 const postRouter = require('./src/routes/postRoutes');
 const tagRouter = require('./src/routes/tagRoutes');
@@ -22,6 +23,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 app.use(appRouter);
+app.use('/auth', authRouter);
 app.use('/users', userRouter);
 app.use('/posts', postRouter);
 app.use('/categories', categoryRouter);
