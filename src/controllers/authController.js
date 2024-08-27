@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const login = async (req, res) => {
@@ -9,7 +8,7 @@ const login = async (req, res) => {
 
         if (!user) {
             return res
-                .statusCode(401)
+                .status(401)
                 .json({ message: 'Invalid email or password' });
         }
 
