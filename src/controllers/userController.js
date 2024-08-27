@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const bcrypt = require('bcrypt');
 
 const getUsers = async (req, res) => {
     try {
@@ -52,7 +53,14 @@ const createUser = async (req, res) => {
             throw new Error('User password is required');
         }
 
-        const user = await User.create(req.body);
+        const user = await User.create({
+            first_name: req.body.first_name,
+            last_name: req.body.last_name,
+            email: req.body.email,
+            password: req.body.password,
+            isActive: false,
+        });
+
         res.status(201).json({
             message: 'User created successfully',
             data: user,
