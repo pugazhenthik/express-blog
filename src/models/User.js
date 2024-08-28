@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
     first_name: {
@@ -25,6 +25,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['Admin', 'Editor', 'Author', 'User'],
         default: 'User',
+    },
+    resetPasswordToken: {
+        type: String,
+    },
+    resetPasswordExpires: {
+        type: Date,
     },
     isActive: {
         type: Boolean,
