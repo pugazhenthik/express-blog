@@ -1,4 +1,4 @@
-process.env.SECRET_KEY = 'sdfsdfdf';
+process.env.SECRET_KEY = 'scretkey';
 const request = require('supertest');
 const User = require('../../src/models/User');
 const app = require('../../app');
