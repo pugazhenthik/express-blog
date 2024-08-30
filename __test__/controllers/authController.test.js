@@ -159,4 +159,40 @@ describe('AuthController', () => {
     afterAll(() => {
         delete process.env.SECRET_KEY;
     });
+
+    it('should handle token invalid error in reset password', async () => {
+        jest.spyOn(User, 'findOne').mockImplementation(() => null);
+
+        const res = await request(app).get('/auth/reset-password/token');
+        console.log(res.body);
+        expect(res.status).toBe(400);
+        expect(res.body.message).toBe(
+            'Password reset token is invalid or has expired',
+        );
+    });
+
+    it('should handle error in reset password', async () => {
+        jest.spyOn(User, 'findOne').mockImplementation(() => {
+            throw new Error('Server error');
+        });
+
+        const res = await request(app).get('/auth/reset-password/token');
+        console.log(res.body);
+        expect(res.status).toBe(500);
+        expect(res.body.message).toBe('Error resetting password');
+    });
+
+    it('should reset password successfully', async () => {
+        jest.spyOn(User, 'findOne').mockImplementation(() => {
+            return {
+                _id: 1,
+                save: jest.fn(),
+            };
+        });
+
+        const res = await request(app).get('/auth/reset-password/token');
+
+        expect(res.status).toBe(200);
+        expect(res.body.message).toBe('Password has been reset successfully');
+    });
 });
