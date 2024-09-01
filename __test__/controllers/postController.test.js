@@ -2,36 +2,35 @@ const mongoose = require('mongoose');
 const request = require('supertest');
 const app = require('../../app');
 const Post = require('../../src/models/Post');
-const { connect, disconnect } = require('../__helper__/mongodb.test.helper');
-
-beforeAll(async () => {
-    await connect();
-});
-
-afterAll(async () => {
-    await disconnect();
-});
-
-beforeEach(() => {
-    jest.restoreAllMocks();
-});
 
 describe('PostController', () => {
-    it('should get all posts', async () => {
-        await Post.create({
-            title: 'Create a new post 1',
-            content: 'New post content 1',
+    it('should get all posts successfully', async () => {
+        const post = [
+            {
+                title: 'Create a new post 1',
+                content: 'New post content 1',
+                author: {
+                    id: 1,
+                    first_name: 'Pugazh',
+                    last_name: 'K',
+                },
+            },
+        ];
+        jest.spyOn(Post, 'find').mockReturnValue({
+            populate: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockResolvedValue(post),
         });
 
-        const posts = await request(app).get('/posts?title=post');
-        const data = await posts.body;
-        expect(data).toEqual(expect.any(Array));
+        const res = await request(app).get('/posts?title=post');
+        expect(res.body.data.length).toBe(1);
+        expect(res.body.data[0].author.first_name).toBe('Pugazh');
+        expect(res.body.data).toEqual(expect.any(Array));
     });
 
-    it('should return 200 if get posts is empty', async () => {
+    it('should handle no records found response', async () => {
         jest.spyOn(Post, 'find').mockImplementation(() => ({
+            populate: jest.fn().mockReturnThis(),
             limit: jest.fn().mockResolvedValue(null),
-            select: jest.fn().mockReturnThis(),
         }));
         const response = await request(app).get('/posts?limit=10&title=title');
         expect(response.statusCode).toBe(200);
@@ -39,7 +38,7 @@ describe('PostController', () => {
         expect(response.body.data).toEqual([]);
     });
 
-    it('should return 500 if get posts fails', async () => {
+    it('should handle error in get posts', async () => {
         Post.find = jest.fn().mockImplementationOnce(() => {
             throw new Error('Database error');
         });
@@ -49,15 +48,56 @@ describe('PostController', () => {
         expect(response.body).toHaveProperty('error', 'Database error');
     });
 
+    it('should handle post 404 not found error', async () => {
+        jest.spyOn(Post, 'findById').mockReturnValue({
+            populate: jest
+                .fn()
+                .mockReturnThis()
+                .mockReturnValue({
+                    populate: jest
+                        .fn()
+                        .mockReturnThis()
+                        .mockReturnValue({
+                            populate: jest.fn().mockResolvedValue(null),
+                        }),
+                }),
+        });
+        const res = await request(app).get('/posts/66c37f742db9c1684bbcb20a');
+        expect(res.status).toBe(404);
+        expect(res.body).toHaveProperty('message', 'Post not found!');
+    });
+
     it('should get a post', async () => {
-        const post = await Post.create({
+        const data = {
             title: 'Create a new post',
             content: 'New post content',
+            author: {
+                _id: '66d28f539973448fc915f3a8',
+                first_name: 'Pugazh',
+                last_name: 'K',
+            },
+        };
+        jest.spyOn(Post, 'findById').mockReturnValue({
+            populate: jest
+                .fn()
+                .mockReturnThis()
+                .mockReturnValue({
+                    populate: jest
+                        .fn()
+                        .mockReturnThis()
+                        .mockReturnValue({
+                            populate: jest.fn().mockResolvedValue(data),
+                        }),
+                }),
         });
-        const res = await request(app).get(`/posts/${post._id}`);
-        expect(200);
+
+        const res = await request(app).get(`/posts/66d28f539973448fc915f3a8`);
+
+        expect(res.status).toBe(200);
         expect(res.body).toHaveProperty('title', 'Create a new post');
         expect(res.body).toHaveProperty('content', 'New post content');
+        expect(res.body).toHaveProperty('author.first_name', 'Pugazh');
+        expect(res.body).toHaveProperty('author.last_name', 'K');
     });
 
     it('should handle errors in getting a post by id', async () => {
@@ -79,9 +119,21 @@ describe('PostController', () => {
     });
 
     it('should create a new post', async () => {
+        const data = {
+            title: 'Post title',
+            content: 'Post content',
+            author: {
+                _id: '66d28f539973448fc915f3a8',
+                first_name: 'Pugazh',
+                last_name: 'K',
+            },
+        };
+
+        jest.spyOn(Post, 'create').mockImplementation(() => data);
         const res = await request(app)
             .post('/posts')
             .send({ title: 'Post title', content: 'Post content' });
+
         expect(res.status).toBe(201);
         expect(res.body).toHaveProperty('title', 'Post title');
         expect(res.body).toHaveProperty('content', 'Post content');
@@ -102,15 +154,23 @@ describe('PostController', () => {
     });
 
     it('should update a post', async () => {
-        const post = await Post.create({
-            title: 'New Post',
-            content: 'New Content',
-        });
+        const data = {
+            _id: '66d28f539973448fc915f3a2',
+            title: 'Post title',
+            content: 'Post content',
+            author: {
+                _id: '66d28f539973448fc915f3a8',
+                first_name: 'Pugazh',
+                last_name: 'K',
+            },
+        };
+
+        jest.spyOn(Post, 'findByIdAndUpdate').mockImplementation(() => data);
 
         const res = await request(app)
-            .put(`/posts/${post._id}`)
+            .put(`/posts/${data._id}`)
             .send({ title: ' Post title', content: 'Post content' });
-
+        console.log(res.body);
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty('title', 'Post title');
         expect(res.body).toHaveProperty('content', 'Post content');
@@ -135,20 +195,13 @@ describe('PostController', () => {
         expect(res.body).toHaveProperty('message', 'Error updating post');
     });
 
-    it('should return 404 for non-existent post', async () => {
-        jest.spyOn(Post, 'findById').mockImplementationOnce(() => null);
-        const res = await request(app).get('/posts/66c37f742db9c1684bbcb20a');
-        expect(res.status).toBe(404);
-        expect(res.body).toHaveProperty('message', 'Post not found!');
-    });
-
     it('should delete a post ', async () => {
-        const post = await Post.create({
-            title: 'Delete post',
-            content: 'Delete content',
+        jest.spyOn(Post, 'findByIdAndDelete').mockReturnValue({
+            message: 'Post deleted successfully!',
         });
-
-        const res = await request(app).delete(`/posts/${post._id}`);
+        const res = await request(app).delete(
+            `/posts/66d28f539973448fc915f3a8`,
+        );
         expect(200);
         expect(res.body).toHaveProperty(
             'message',
@@ -158,14 +211,16 @@ describe('PostController', () => {
 
     it('should handle post not found error in delete post', async () => {
         jest.spyOn(Post, 'findByIdAndDelete').mockResolvedValue(null);
-        const res = await request(app).delete(`/posts/23fsfsdfsdfsdf`);
+        const res = await request(app).delete(
+            `/posts/66d28f539973448fc915f3a8`,
+        );
         expect(404);
         expect(res.body).toHaveProperty('message', 'Post not found');
     });
 
     it('should handle 500 error in delete post', async () => {
-        jest.spyOn(Post, 'findByIdAndDelete').mockImplementationOnce(() => {
-            throw new Error('Something went wrong');
+        jest.spyOn(Post, 'findByIdAndDelete').mockRejectedValue({
+            message: 'Something went wrong',
         });
         const res = await request(app).delete(`/posts/23fsfsdfsdfsdf`);
         expect(500);
@@ -173,9 +228,12 @@ describe('PostController', () => {
     });
 
     it('should delete all posts', async () => {
-        await Post.create({ title: 'Title', content: 'Content' });
+        jest.spyOn(Post, 'deleteMany').mockResolvedValue({
+            message: 'Posts are deleted successfully!',
+        });
+
         const res = await request(app).delete('/posts/all');
-        expect(200);
+        expect(res.status).toBe(200);
         expect(res.body).toHaveProperty(
             'message',
             'Posts are deleted successfully!',
@@ -184,10 +242,10 @@ describe('PostController', () => {
 
     it('should handle error in delete all posts', async () => {
         jest.spyOn(Post, 'deleteMany').mockImplementationOnce(() => {
-            throw new Error('Post not deleted');
+            throw new Error('Posts are not deleted');
         });
         const res = await request(app).delete('/posts/all');
-        expect(500);
+        expect(res.status).toBe(500);
         expect(res.body).toHaveProperty('message', 'Something went wrong');
     });
 });

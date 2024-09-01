@@ -14,6 +14,7 @@ const postSchema = new mongoose.Schema(
         author: {
             type: mongoose.Schema.ObjectId,
             ref: 'User',
+            required: true,
         },
         categories: [
             {

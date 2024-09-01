@@ -8,18 +8,20 @@ const getPosts = async (req, res) => {
         if (req.query.title) {
             filters.title = { $regex: req.query.title, $options: 'i' };
         }
+
         const posts = await Post.find(filters)
             .populate('author', ['first_name', 'last_name'])
             .populate('categories', ['name'])
             .populate('tags', ['name'])
             .limit(limit);
+
         if (!posts) {
             res.status(200).json({
                 message: 'No records found',
                 data: [],
             });
         } else {
-            res.status(200).json(posts);
+            res.status(200).json({ data: posts });
         }
     } catch (error) {
         res.status(500).json({
@@ -35,6 +37,7 @@ const getPost = async (req, res) => {
             .populate('author', ['first_name'])
             .populate('categories', 'name')
             .populate('tags', 'name');
+
         if (!post) {
             res.status(404).json({
                 message: 'Post not found!',
@@ -52,11 +55,12 @@ const getPost = async (req, res) => {
 
 const createPost = async (req, res) => {
     try {
-        const { title, content, author, tags } = req.body;
+        const { title, content, author, categories, tags } = req.body;
         const post = await Post.create({
             title,
             content,
             author,
+            categories,
             tags,
         });
         res.status(201).json(post);
