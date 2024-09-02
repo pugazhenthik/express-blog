@@ -6,8 +6,7 @@ const { randomBytes } = require('crypto');
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email });
-
+        const user = await User.findOne({ email }).select('+password');
         if (!user) {
             return res
                 .status(401)
@@ -19,6 +18,7 @@ const login = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ message: 'Incorrect password' });
         }
+
         const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
             expiresIn: '1h',
         });
