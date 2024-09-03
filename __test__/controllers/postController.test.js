@@ -1,9 +1,22 @@
+process.env.SECRET_KEY = 'mysecretkey';
 const mongoose = require('mongoose');
 const request = require('supertest');
 const app = require('../../app');
 const Post = require('../../src/models/Post');
+const User = require('../../src/models/User');
+const jwt = require('jsonwebtoken');
+jest.mock('jsonwebtoken');
 
 describe('PostController', () => {
+    beforeEach(() => {
+        jwt.verify.mockReturnValue(true);
+        jest.spyOn(User, 'findById').mockImplementationOnce(() => {
+            return {
+                _id: '66d3f90bdcb98e05334b541d',
+            };
+        });
+    });
+
     it('should get all posts successfully', async () => {
         const post = [
             {
@@ -16,12 +29,16 @@ describe('PostController', () => {
                 },
             },
         ];
+
         jest.spyOn(Post, 'find').mockReturnValue({
             populate: jest.fn().mockReturnThis(),
             limit: jest.fn().mockResolvedValue(post),
         });
 
-        const res = await request(app).get('/posts?title=post');
+        const res = await request(app)
+            .get('/posts?title=post')
+            .set('Authorization', 'Bearer valid-token');
+
         expect(res.body.data.length).toBe(1);
         expect(res.body.data[0].author.first_name).toBe('Pugazh');
         expect(res.body.data).toEqual(expect.any(Array));
@@ -32,7 +49,10 @@ describe('PostController', () => {
             populate: jest.fn().mockReturnThis(),
             limit: jest.fn().mockResolvedValue(null),
         }));
-        const response = await request(app).get('/posts?limit=10&title=title');
+        const response = await request(app)
+            .get('/posts?limit=10&title=title')
+            .set('Authorization', 'Bearer valid-token');
+
         expect(response.statusCode).toBe(200);
         expect(response.body.message).toBe('No records found');
         expect(response.body.data).toEqual([]);
@@ -43,7 +63,10 @@ describe('PostController', () => {
             throw new Error('Database error');
         });
 
-        const response = await request(app).get('/posts?limit=10');
+        const response = await request(app)
+            .get('/posts?limit=10')
+            .set('Authorization', 'Bearer valid-token');
+
         expect(response.status).toBe(500);
         expect(response.body).toHaveProperty('error', 'Database error');
     });
@@ -62,7 +85,10 @@ describe('PostController', () => {
                         }),
                 }),
         });
-        const res = await request(app).get('/posts/66c37f742db9c1684bbcb20a');
+        const res = await request(app)
+            .get('/posts/66c37f742db9c1684bbcb20a')
+            .set('Authorization', 'Bearer valid-token');
+
         expect(res.status).toBe(404);
         expect(res.body).toHaveProperty('message', 'Post not found!');
     });
@@ -91,7 +117,9 @@ describe('PostController', () => {
                 }),
         });
 
-        const res = await request(app).get(`/posts/66d28f539973448fc915f3a8`);
+        const res = await request(app)
+            .get(`/posts/66d28f539973448fc915f3a8`)
+            .set('Authorization', 'Bearer valid-token');
 
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty('title', 'Create a new post');
@@ -107,7 +135,9 @@ describe('PostController', () => {
             throw new Error('Database error');
         });
 
-        const res = await request(app).get(`/posts/${invalidPostId}`);
+        const res = await request(app)
+            .get(`/posts/${invalidPostId}`)
+            .set('Authorization', 'Bearer valid-token');
 
         expect(res.statusCode).toBe(500);
         expect(res.body).toEqual({
@@ -132,7 +162,8 @@ describe('PostController', () => {
         jest.spyOn(Post, 'create').mockImplementation(() => data);
         const res = await request(app)
             .post('/posts')
-            .send({ title: 'Post title', content: 'Post content' });
+            .send({ title: 'Post title', content: 'Post content' })
+            .set('Authorization', 'Bearer valid-token');
 
         expect(res.status).toBe(201);
         expect(res.body).toHaveProperty('title', 'Post title');
@@ -145,7 +176,9 @@ describe('PostController', () => {
         });
         const res = await request(app)
             .post('/posts')
-            .send({ title: 'content' });
+            .send({ title: 'content' })
+            .set('Authorization', 'Bearer valid-token');
+
         expect(500);
         expect(res.body).toEqual({
             error: 'Not able to create a post.',
@@ -169,8 +202,9 @@ describe('PostController', () => {
 
         const res = await request(app)
             .put(`/posts/${data._id}`)
-            .send({ title: ' Post title', content: 'Post content' });
-        console.log(res.body);
+            .send({ title: ' Post title', content: 'Post content' })
+            .set('Authorization', 'Bearer valid-token');
+
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty('title', 'Post title');
         expect(res.body).toHaveProperty('content', 'Post content');
@@ -179,7 +213,11 @@ describe('PostController', () => {
     it('should handle error in updating post', async () => {
         jest.spyOn(Post, 'findByIdAndUpdate').mockResolvedValue(null);
 
-        const res = await request(app).put('/posts/sdfsffsf').send({});
+        const res = await request(app)
+            .put('/posts/sdfsffsf')
+            .send({})
+            .set('Authorization', 'Bearer valid-token');
+
         expect(404);
         expect(res.body).toEqual({ message: 'Post not found' });
     });
@@ -189,8 +227,12 @@ describe('PostController', () => {
             throw new Error('Database error');
         });
 
-        const res = await request(app).put('/posts/sdfsffsf').send({});
-        expect(500);
+        const res = await request(app)
+            .put('/posts/sdfsffsf')
+            .send({})
+            .set('Authorization', 'Bearer valid-token');
+
+        expect(res.status).toBe(500);
         expect(res.body).toHaveProperty('error', 'Database error');
         expect(res.body).toHaveProperty('message', 'Error updating post');
     });
@@ -199,10 +241,11 @@ describe('PostController', () => {
         jest.spyOn(Post, 'findByIdAndDelete').mockReturnValue({
             message: 'Post deleted successfully!',
         });
-        const res = await request(app).delete(
-            `/posts/66d28f539973448fc915f3a8`,
-        );
-        expect(200);
+        const res = await request(app)
+            .delete(`/posts/66d28f539973448fc915f3a8`)
+            .set('Authorization', 'Bearer valid-token');
+
+        expect(res.status).toBe(200);
         expect(res.body).toHaveProperty(
             'message',
             'Post deleted successfully!',
@@ -211,10 +254,11 @@ describe('PostController', () => {
 
     it('should handle post not found error in delete post', async () => {
         jest.spyOn(Post, 'findByIdAndDelete').mockResolvedValue(null);
-        const res = await request(app).delete(
-            `/posts/66d28f539973448fc915f3a8`,
-        );
-        expect(404);
+        const res = await request(app)
+            .delete(`/posts/66d28f539973448fc915f3a8`)
+            .set('Authorization', 'Bearer valid-token');
+
+        expect(res.status).toBe(404);
         expect(res.body).toHaveProperty('message', 'Post not found');
     });
 
@@ -222,8 +266,11 @@ describe('PostController', () => {
         jest.spyOn(Post, 'findByIdAndDelete').mockRejectedValue({
             message: 'Something went wrong',
         });
-        const res = await request(app).delete(`/posts/23fsfsdfsdfsdf`);
-        expect(500);
+        const res = await request(app)
+            .delete(`/posts/23fsfsdfsdfsdf`)
+            .set('Authorization', 'Bearer valid-token');
+
+        expect(res.status).toBe(500);
         expect(res.body).toHaveProperty('message', 'Something went wrong');
     });
 
@@ -232,7 +279,10 @@ describe('PostController', () => {
             message: 'Posts are deleted successfully!',
         });
 
-        const res = await request(app).delete('/posts/all');
+        const res = await request(app)
+            .delete('/posts/all')
+            .set('Authorization', 'Bearer valid-token');
+
         expect(res.status).toBe(200);
         expect(res.body).toHaveProperty(
             'message',
@@ -244,7 +294,10 @@ describe('PostController', () => {
         jest.spyOn(Post, 'deleteMany').mockImplementationOnce(() => {
             throw new Error('Posts are not deleted');
         });
-        const res = await request(app).delete('/posts/all');
+        const res = await request(app)
+            .delete('/posts/all')
+            .set('Authorization', 'Bearer valid-token');
+
         expect(res.status).toBe(500);
         expect(res.body).toHaveProperty('message', 'Something went wrong');
     });

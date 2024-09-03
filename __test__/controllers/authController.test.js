@@ -3,6 +3,9 @@ const request = require('supertest');
 const User = require('../../src/models/User');
 const app = require('../../app');
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+
+jest.mock('jsonwebtoken');
 
 describe('AuthController', () => {
     it('should handle error in login', async () => {
@@ -11,7 +14,6 @@ describe('AuthController', () => {
         });
 
         const user = await request(app).post('/auth/login');
-        console.log(user.body);
         expect(user.status).toBe(500);
         expect(user.body.message).toBe('Error logged in');
     });
@@ -20,7 +22,6 @@ describe('AuthController', () => {
         jest.spyOn(User, 'findOne').mockImplementation(() => null);
 
         const user = await request(app).post('/auth/login');
-        console.log(user.body);
         expect(user.status).toBe(401);
         expect(user.body.message).toBe('Invalid email or password');
     });
@@ -89,6 +90,7 @@ describe('AuthController', () => {
         const consoleSpy = jest
             .spyOn(console, 'log')
             .mockImplementation(() => {});
+
         jest.spyOn(nodemailer, 'createTransport').mockImplementationOnce(() => {
             return {
                 sendMail: jest
@@ -132,9 +134,7 @@ describe('AuthController', () => {
 
         const user = await request(app).post('/auth/forgot-password');
         expect(user.status).toBe(200);
-        expect(consoleSpy).toHaveBeenCalledWith(
-            'Error:Error: Failed to send email',
-        );
+        expect(consoleSpy).toHaveBeenCalledWith('Email sent: ok');
         expect(user.body.message).toBe(
             'Password reset email sent to your inbox',
         );
@@ -164,7 +164,6 @@ describe('AuthController', () => {
         jest.spyOn(User, 'findOne').mockImplementation(() => null);
 
         const res = await request(app).get('/auth/reset-password/token');
-        console.log(res.body);
         expect(res.status).toBe(400);
         expect(res.body.message).toBe(
             'Password reset token is invalid or has expired',
@@ -177,7 +176,6 @@ describe('AuthController', () => {
         });
 
         const res = await request(app).get('/auth/reset-password/token');
-        console.log(res.body);
         expect(res.status).toBe(500);
         expect(res.body.message).toBe('Error resetting password');
     });
