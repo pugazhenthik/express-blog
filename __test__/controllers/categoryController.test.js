@@ -1,8 +1,21 @@
+process.env.SECRET_KEY = 'mysecretkey';
 const request = require('supertest');
 const Category = require('../../src/models/Category');
 const app = require('../../app');
+const User = require('../../src/models/User');
+const jwt = require('jsonwebtoken');
+jest.mock('jsonwebtoken');
 
 describe('CategoryController', () => {
+    beforeEach(() => {
+        jwt.verify.mockReturnValue(true);
+        jest.spyOn(User, 'findById').mockImplementationOnce(() => {
+            return {
+                _id: '66d3f90bdcb98e05334b541d',
+            };
+        });
+    });
+
     it('should get all categories', async () => {
         const data = [
             { name: 'Category 1', isActive: true },
@@ -10,7 +23,9 @@ describe('CategoryController', () => {
         ];
         jest.spyOn(Category, 'find').mockImplementation(() => data);
 
-        const categories = await request(app).get('/categories');
+        const categories = await request(app)
+            .get('/categories')
+            .set('Authorization', 'Bearer valid-token');
         expect(categories.status).toBe(200);
         expect(categories.body.length).toBe(2);
     });
@@ -19,7 +34,9 @@ describe('CategoryController', () => {
         jest.spyOn(Category, 'find').mockImplementation(() => {
             throw new Error('Database error!');
         });
-        const categories = await request(app).get('/categories');
+        const categories = await request(app)
+            .get('/categories')
+            .set('Authorization', 'Bearer valid-token');
         expect(categories.status).toBe(500);
         expect(categories.body.message).toBe(
             'Something went wrong while fetching categories.',
@@ -31,7 +48,9 @@ describe('CategoryController', () => {
         const data = { id: 1, isActive: false, name: 'Category 1' };
         jest.spyOn(Category, 'findById').mockImplementation(() => data);
 
-        const category = await request(app).get('/categories/1');
+        const category = await request(app)
+            .get('/categories/1')
+            .set('Authorization', 'Bearer valid-token');
         expect(category.status).toBe(200);
         expect(category.body).toHaveProperty('name', 'Category 1');
     });
@@ -39,7 +58,9 @@ describe('CategoryController', () => {
     it('should handle category not found 404 error', async () => {
         jest.spyOn(Category, 'findById').mockResolvedValue(null);
 
-        const category = await request(app).get('/categories/1');
+        const category = await request(app)
+            .get('/categories/1')
+            .set('Authorization', 'Bearer valid-token');
 
         expect(category.status).toBe(404);
         expect(category.body.message).toBe('Category not found!');
@@ -50,7 +71,9 @@ describe('CategoryController', () => {
             throw new Error('Database error!');
         });
 
-        const category = await request(app).get('/categories/1');
+        const category = await request(app)
+            .get('/categories/1')
+            .set('Authorization', 'Bearer valid-token');
 
         expect(category.status).toBe(500);
         expect(category.body.message).toBe(
@@ -69,7 +92,10 @@ describe('CategoryController', () => {
             return data;
         });
 
-        const category = await request(app).post('/categories').send(data);
+        const category = await request(app)
+            .post('/categories')
+            .send(data)
+            .set('Authorization', 'Bearer valid-token');
 
         expect(category.status).toBe(201);
         expect(category.body.message).toBe('Category created successfully!');
@@ -81,7 +107,10 @@ describe('CategoryController', () => {
             throw new Error('Database error!');
         });
 
-        const category = await request(app).post('/categories').send({});
+        const category = await request(app)
+            .post('/categories')
+            .send({})
+            .set('Authorization', 'Bearer valid-token');
 
         expect(category.status).toBe(500);
         expect(category.body.message).toBe(
@@ -95,7 +124,10 @@ describe('CategoryController', () => {
             throw new Error('Database error!');
         });
 
-        const category = await request(app).put('/categories/1').send({});
+        const category = await request(app)
+            .put('/categories/1')
+            .send({})
+            .set('Authorization', 'Bearer valid-token');
 
         expect(category.status).toBe(500);
         expect(category.body.message).toBe(
@@ -107,7 +139,10 @@ describe('CategoryController', () => {
     it('should handle error 404 not found category in update category', async () => {
         jest.spyOn(Category, 'findByIdAndUpdate').mockReturnValue(null);
 
-        const category = await request(app).put('/categories/1').send({});
+        const category = await request(app)
+            .put('/categories/1')
+            .send({})
+            .set('Authorization', 'Bearer valid-token');
         expect(category.status).toBe(404);
         expect(category.body.message).toBe('Category not found!');
     });
@@ -118,7 +153,10 @@ describe('CategoryController', () => {
             () => data,
         );
 
-        const category = await request(app).put('/categories/1').send(data);
+        const category = await request(app)
+            .put('/categories/1')
+            .send(data)
+            .set('Authorization', 'Bearer valid-token');
         expect(category.status).toBe(200);
         expect(category.body.message).toBe('Category updated successfully!');
     });
@@ -128,7 +166,9 @@ describe('CategoryController', () => {
             () => null,
         );
 
-        const category = await request(app).delete('/categories/1');
+        const category = await request(app)
+            .delete('/categories/1')
+            .set('Authorization', 'Bearer valid-token');
 
         expect(category.status).toBe(404);
         expect(category.body.message).toBe('Category not found!');
@@ -139,7 +179,9 @@ describe('CategoryController', () => {
             throw new Error('Database error!');
         });
 
-        const category = await request(app).delete('/categories/1');
+        const category = await request(app)
+            .delete('/categories/1')
+            .set('Authorization', 'Bearer valid-token');
 
         expect(category.status).toBe(500);
         expect(category.body.message).toBe(
@@ -153,7 +195,9 @@ describe('CategoryController', () => {
             () => true,
         );
 
-        const category = await request(app).delete('/categories/1');
+        const category = await request(app)
+            .delete('/categories/1')
+            .set('Authorization', 'Bearer valid-token');
 
         expect(category.status).toBe(200);
         expect(category.body.message).toBe('Category deleted successfully!');
