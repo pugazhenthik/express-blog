@@ -6,7 +6,7 @@ const { randomBytes } = require('crypto');
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await User.findOne({ email }).select('+password');
+        const user = await User.findOne({ email });
         if (!user) {
             return res
                 .status(401)
@@ -20,7 +20,7 @@ const login = async (req, res) => {
         }
 
         const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
-            expiresIn: '1h',
+            expiresIn: '10d',
         });
 
         return res
@@ -63,8 +63,7 @@ const forgotPassword = async (req, res) => {
             text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\nhttp://${req.headers.host}/api/auth/reset-password/${token}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.\n`,
         };
 
-        // Send the email
-        transporter.sendMail(mailOptions, function (error, info) {
+        await transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 console.log('Error:' + error);
             } else {
