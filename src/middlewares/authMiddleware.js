@@ -6,7 +6,7 @@ const authenticate = async (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
         return res.status(401).json({
-            message: 'Token not provided. Authorization denied.',
+            message: 'Token not provided. Authorization denied',
         });
     }
     try {
@@ -21,7 +21,7 @@ const authenticate = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        return res.json({
+        return res.status(500).json({
             message: 'Authentication failed',
             error: error.message,
         });
