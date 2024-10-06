@@ -19,7 +19,11 @@ describe('AuthController', () => {
     });
 
     it('should handle invalid email or password error', async () => {
-        jest.spyOn(User, 'findOne').mockImplementation(() => null);
+        jest.spyOn(User, 'findOne').mockImplementation(() => {
+            return {
+                select: jest.fn().mockReturnValue(null),
+            };
+        });
 
         const user = await request(app).post('/auth/login');
         expect(user.status).toBe(401);
@@ -29,6 +33,7 @@ describe('AuthController', () => {
     it('should handle invalid password error', async () => {
         jest.spyOn(User, 'findOne').mockImplementation(() => {
             return {
+                select: jest.fn().mockReturnThis(),
                 email: 'test@gmail.com',
                 password: 'password',
                 comparePassword: jest.fn(),
@@ -43,6 +48,7 @@ describe('AuthController', () => {
     it('should login successfully', async () => {
         jest.spyOn(User, 'findOne').mockImplementation(() => {
             return {
+                select: jest.fn().mockReturnThis(),
                 email: 'test@gmail.com',
                 password: 'password',
                 comparePassword: jest.fn().mockReturnValue(true),
